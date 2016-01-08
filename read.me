@@ -1,0 +1,17 @@
+
+
+Iniciar mongo
+mongod --port 27017 --bind_ip=127.0.0.1 --dbpath rs0-0 --replSet rs0 --smallfiles --oplogSize 128
+mongod --port 27018 --bind_ip=127.0.0.1 --dbpath rs0-1 --replSet rs0 --smallfiles --oplogSize 128
+mongod --port 27019 --bind_ip=127.0.0.1 --dbpath rs0-2 --replSet rs0 --smallfiles --oplogSize 128
+
+Para iniciar la replica cero
+rs.initiate({_id:"rs0", members: [{"_id":1, "host":"127.0.0.1:27017"}]})
+
+rs.add("127.0.0.1:27018")
+rs.add("127.0.0.1:27019")
+
+
+
+
+http://stackoverflow.com/questions/4827344/how-to-parse-xml-using-the-sax-parser

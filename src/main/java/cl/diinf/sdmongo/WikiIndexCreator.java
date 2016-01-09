@@ -108,16 +108,16 @@ public class WikiIndexCreator {
             // Verificamos si la palabra no existe en la base de datos
             if (indexMongo.count() == 0) {
                 BasicDBList lista = new BasicDBList();
-                lista.add(new BasicDBObject("id_documento", idDocumento).append("frecuencia", cantidadRepeticiones.get(i)));
+                lista.add(new BasicDBObject("id_documento", idDocumento).append("titulo", titulo).append("frecuencia", cantidadRepeticiones.get(i)));
                 palabraIngresar.put("documento", lista);
                 indiceInvertido.insert(palabraIngresar);
             } else {
-                System.out.println("Reemplazando");
-                BasicDBObject consultaAgregar = new BasicDBObject();
-                BasicDBList listaModificar = new BasicDBList();
-                listaModificar.add(new BasicDBObject("id_documento", idDocumento).append("frecuencia", cantidadRepeticiones.get(i)));
-                consultaAgregar.put("$push", new BasicDBObject("documento", listaModificar));
-                indiceInvertido.update(palabraIngresar, consultaAgregar);
+                System.out.println("Actualizando");
+                BasicDBObject itemIngresar = new BasicDBObject("documento", new BasicDBObject("id_documento", idDocumento).append("titulo", titulo).append("frecuencia", cantidadRepeticiones.get(i)));
+                BasicDBObject itemFinal = new BasicDBObject("$push", itemIngresar);
+                indiceInvertido.update(palabraIngresar, itemFinal);
+                
+               
             }
 
         }

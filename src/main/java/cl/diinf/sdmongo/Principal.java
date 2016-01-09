@@ -19,7 +19,10 @@ import com.mongodb.WriteConcern;
 import com.mongodb.WriteResult;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoDatabase;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.Arrays;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
@@ -30,13 +33,32 @@ import javax.xml.parsers.SAXParserFactory;
  */
 public class Principal {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
 
         String nombreDB;
         String nombreCollection;
         String nombreIndice;
+        String fileName;
 
         try {
+            BufferedReader entrada =   new BufferedReader(new FileReader("datos.ini"));
+            
+            nombreDB = null;
+            try {
+                nombreDB = entrada.readLine();
+                fileName = entrada.readLine();
+                nombreCollection = entrada.readLine();
+                nombreIndice = entrada.readLine();
+
+            } catch (Exception e) {
+                System.err.println(e.getClass().getName() + ": " + e.getMessage());
+                fileName = "ismael.xml";
+                nombreDB = "labsd";
+                nombreCollection = "documentos";
+                nombreIndice = "indiceInvertido";
+            }
+            entrada.close();
+        
             BasicDBObject ObjDocumento = new BasicDBObject();
             DBCollection documentos;
             DBCollection indiceInvertido;
@@ -48,11 +70,8 @@ public class Principal {
                     new ServerAddress("localhost", 27019)));*/
             mongoClient.slaveOk();
             mongoClient.setWriteConcern(WriteConcern.SAFE);
-            nombreDB = "labsd";
             DB database = mongoClient.getDB(nombreDB);
             System.out.println("Conexión a base de datos " + nombreDB + "realizada con éxito");
-            nombreCollection = "documentos";
-            nombreIndice = "indiceInvertido";
             System.out.println("Detectando la existencia de coleciones requeridas...");
             System.out.print("Coleccion de documentos...");
             if (!database.collectionExists(nombreCollection)) {
@@ -67,7 +86,7 @@ public class Principal {
                 System.out.println("No existe la coleccion de indices...");
                 System.out.println("creando coleccion de indices invertidos");
                 indiceInvertido = database.createCollection(nombreIndice, new BasicDBObject());
-            }else{
+            } else {
                 System.out.println("La coleccion de indice invertido existe");
             }
             documentos = database.getCollection(nombreCollection);
@@ -85,7 +104,7 @@ public class Principal {
             SAXParserFactory factory = SAXParserFactory.newInstance();
             SAXParser parser = factory.newSAXParser();
             WikiXMLReader wikiXML = new WikiXMLReader(documentos, database, indiceInvertido);
-            parser.parse(new File("ismael.xml"), wikiXML);
+            parser.parse(new File(fileName), wikiXML);
 
             // Muestra los documentos
             System.out.println("=======================================");
@@ -107,7 +126,7 @@ public class Principal {
             System.out.println("=======================================");
             System.out.println("=======================================");
 
-            System.out.println("Cantidad de elementos: " + db.getCollection(nombreCollection));
+            System.out.println("Cantidad de elementos: " + db.getCollection(nombreCollection).count());
 
             // Ciera la conexion al cluster
             mongoClient.close();
